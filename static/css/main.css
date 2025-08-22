@@ -1,0 +1,22 @@
+@layer utilities {
+    .content-auto {
+        content-visibility: auto;
+    }
+    .shadow-custom {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    }
+    .transition-custom {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+/* 夜间模式样式 - 修改版 */
+.dark { color: #F8FAFC; }
+.dark body { background-color: #1E293B; }
+.dark .bg-white { background-color: #334155; }
+.dark .bg-gray-50 { background-color: #334155; }
+.dark .border-gray-300 { border-color: #475569; }
+.dark .text-gray-500 { color: #94A3B8; }
+.dark .text-gray-600 { color: #CBD5E1; }
+.dark .hover:bg-gray-200 { background-color: #475569; }
+.dark .hover:bg-red-200 { background-color: #7F1D1D; }

@@ -1,0 +1,23 @@
+{
+  "name": "fileupanddown",
+  "version": "1.0.0",
+  "description": "一个本地文件传输系统",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.3",
+    "electron": "^37.2.6",
+    "electron-reload": "^2.0.0-alpha.1"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1",
+    "python-shell": "^5.0.0"
+  }
+}

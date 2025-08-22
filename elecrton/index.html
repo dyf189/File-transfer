@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件快传 - 电脑手机互传工具</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入自定义CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                        dark: {
+                            bg: '#1E293B',
+                            card: '#334155',
+                            text: '#F8FAFC'
+                        },
+                        light: {
+                            bg: '#F8FAFC',
+                            card: '#FFFFFF',
+                            text: '#1E293B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-light-bg dark:bg-dark-bg min-h-screen font-sans text-light-text transition-custom" id="body">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- 页面标题和主题切换 -->
+        <header class="text-center mb-12 mt-4 relative">
+            <button id="theme-toggle" class="absolute right-0 top-0 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-dark-card transition-custom">
+                <i class="fa fa-moon-o text-gray-600 dark:text-yellow-300"></i>
+            </button>
+            <div class="inline-block p-3 bg-primary/10 rounded-full mb-4">
+                <i class="fa fa-exchange text-3xl text-primary"></i>
+            </div>
+            <h1 class="text-[clamp(1.8rem,5vw,3rem)] font-bold text-gray-800 dark:text-white mb-2">文件快传</h1>
+            <p class="text-gray-600 dark:text-gray-300 max-w-md mx-auto">简单高效的本地文件传输工具，无需互联网连接</p>
+
+            <!-- 添加：服务器IP显示区域 -->
+            <div class="mt-6 p-4 bg-primary/10 rounded-lg dark:bg-dark-card/50">
+                <p class="text-center text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fa fa-server mr-2"></i>可访问地址
+                </p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <div class="bg-white dark:bg-dark-card px-4 py-2 rounded shadow-sm font-mono text-sm">
+                        http://{{ server_ip }}:5000
+                    </div>
+                    <div class="bg-white dark:bg-dark-card px-4 py-2 rounded shadow-sm font-mono text-sm">
+                        http://localhost:5000
+                    </div>
+                </div>
+            </div>
+            <!-- 结束：服务器IP显示区域 -->
+
+        </header>
+
+        <!-- 文件上传区域 -->
+        <div class="bg-light-card dark:bg-dark-card rounded-2xl shadow-custom p-6 md:p-8 transform hover:shadow-lg transition-custom">
+            <h2 class="text-xl font-semibold mb-6 flex items-center">
+                <i class="fa fa-cloud-upload text-secondary mr-2"></i>上传文件
+            </h2>
+            
+            <!-- 文件名显示区域 -->
+            <div id="selected-file" class="mb-4 p-3 bg-gray-50 dark:bg-dark-card/70 rounded-lg hidden">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center text-sm">
+                        <i class="fa fa-file-text-o text-primary mr-2"></i>
+                        <span id="file-name-display"></span>
+                    </div>
+                    <button id="clear-file" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 确保表单ID和action正确 -->
+            <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <div id="drop-area" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary transition-custom cursor-pointer bg-gray-50">
+                    <i class="fa fa-file-o text-4xl text-gray-400 mb-3"></i>
+                    <p class="text-gray-500 mb-2">拖放文件到此处或</p>
+                    <label class="inline-block bg-primary text-white py-2 px-6 rounded-lg cursor-pointer hover:bg-primary/90 transition-custom">
+                        <i class="fa fa-plus mr-1"></i>选择文件
+                        <input type="file" name="file" required class="hidden" id="file-input">
+                    </label>
+                </div>
+                
+                <button type="submit" class="w-full bg-secondary hover:bg-secondary/90 text-white py-3 px-6 rounded-lg font-medium transition-custom flex items-center justify-center">
+                    <i class="fa fa-paper-plane mr-2"></i>开始上传
+                </button>
+            </form>
+        </div>
+
+        <!-- 文件列表区域 -->
+        <div class="bg-light-card dark:bg-dark-card rounded-2xl shadow-custom p-6 md:p-8 transform hover:shadow-lg transition-custom">
+            <h2 class="text-xl font-semibold mb-6 flex items-center">
+                <i class="fa fa-files-o text-accent mr-2"></i>文件列表
+            </h2>
+            <div class="space-y-3">
+                {% if files and files|length > 0 %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {% for filename in files %}
+                            <div class="bg-gray-50 dark:bg-dark-card/70 p-3 rounded-lg flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <i class="fa fa-file-o text-primary mr-3"></i>
+                                    <span class="truncate max-w-[200px] md:max-w-[300px]">{{ filename }}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="/download/{{ filename }}" class="text-secondary hover:text-secondary/80 p-1">
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                    <button class="delete-btn text-red-500 hover:text-red-700 p-1" data-filename="{{ filename }}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <i class="fa fa-folder-open-o text-4xl mb-3"></i>
+                        <p>暂无上传文件</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>同一局域网内使用 | <a href="#" class="hover:text-primary transition-custom">使用帮助</a></p>
+        </footer>
+    </div>
+
+    <!-- 引入外部JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
